@@ -12,7 +12,7 @@ WORKDIR /app
 
 # Install git
 RUN apt update && \
-    apt install git
+    apt install -y git
 
 # Install pip requirements
 COPY ./requirements.txt .
