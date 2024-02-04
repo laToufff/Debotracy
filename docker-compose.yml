@@ -1,0 +1,11 @@
+version: '3'
+services:
+  discord-bot:
+    container_name: discord-bot
+    image: ghcr.io/nicebots-xyz/chatcop:main
+    env_file:
+      - .env
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
