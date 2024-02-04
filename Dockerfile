@@ -15,7 +15,7 @@ RUN apt update && \
     apt install git
 
 # Install pip requirements
-COPY requirements.txt .
+COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
