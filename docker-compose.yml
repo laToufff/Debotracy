@@ -2,7 +2,7 @@ version: '3'
 services:
   discord-bot:
     container_name: discord-bot
-    image: ghcr.io/laToufff/Debotracy:main
+    image: ghcr.io/latoufff/debotracy:main
     env_file:
       - .env
     deploy:

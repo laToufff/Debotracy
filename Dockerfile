@@ -25,4 +25,4 @@ USER appuser
 # Copy the rest of the codebase into the image
 COPY . /app
 
-CMD ["python", "code.py"]
+CMD ["python", "main.py"]
