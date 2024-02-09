@@ -5,6 +5,8 @@ services:
     image: ghcr.io/latoufff/debotracy:main
     env_file:
       - .env
+    volumes:
+      - ./data:/app/data
     deploy:
       replicas: 1
       restart_policy:
