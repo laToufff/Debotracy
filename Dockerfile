@@ -12,7 +12,9 @@ WORKDIR /app
 
 # Install git
 RUN apt update && \
-    apt install -y git
+    apt install -y \
+    git \
+    sqlite3
 
 # Install pip requirements
 COPY ./requirements.txt .
