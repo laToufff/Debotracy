@@ -4,6 +4,9 @@ import os
 from dotenv import load_dotenv
 from discord.ext import commands
 
+import database as db
+from cogs import Config
+
 load_dotenv()
 
 intents = dc.Intents.default()
@@ -16,6 +19,8 @@ class Main (commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'Bot ready as {bot.user.name}!')
+        await bot.change_presence(activity=dc.Game(name="with votes..."))
+        await db.create_all()
 
     @commands.slash_command()
     async def ping(self, ctx: dc.ApplicationContext):
@@ -23,5 +28,6 @@ class Main (commands.Cog):
         await ctx.respond('Pong!', ephemeral=True)
 
 bot.add_cog(Main(bot))
+bot.add_cog(Config(bot))
 
 bot.run(os.getenv("TOKEN"))
