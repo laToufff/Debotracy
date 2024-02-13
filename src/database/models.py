@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, BigInteger, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, BigInteger, String, Boolean, ForeignKey, Time
 from .base import Base
 
 
@@ -13,15 +13,15 @@ class Vote(Base) :
     __tablename__ = 'votes'
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    guild_id = Column(Integer, ForeignKey('guilds.id'))
-    author_id = Column(Integer)
-    msg_id = Column(Integer)
+    guild_id = Column(BigInteger, ForeignKey('guilds.id'))
+    author_id = Column(BigInteger)
+    msg_id = Column(BigInteger)
     name = Column(String)
     description = Column(String)
     multiple_choices = Column(Boolean)
-    time_created = Column(Integer)
-    time_closed = Column(Integer)
-    time_edited = Column(Integer)
+    time_created = Column(Time)
+    time_closed = Column(Time)
+    time_edited = Column(Time)
     is_open = Column(Boolean)
 
 class VoteOption(Base) :
@@ -44,4 +44,4 @@ class VoteUser(Base) :
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     choice_id = Column(Integer, ForeignKey('vote_choices.id'))
-    user_id = Column(Integer)
+    user_id = Column(BigInteger)

@@ -4,13 +4,11 @@ import os
 from dotenv import load_dotenv
 from discord.ext import commands
 
-import database as db
-from cogs import Config
+from src import database as db
+from src.cogs import Setup
+from src.config import bot
 
 load_dotenv()
-
-intents = dc.Intents.default()
-bot = dc.Bot(intents=intents, debug_guilds=[int(os.getenv("DEBUG_GUILD"))])
 
 class Main (commands.Cog):
     def __init__(self, bot):
@@ -28,6 +26,6 @@ class Main (commands.Cog):
         await ctx.respond('Pong!', ephemeral=True)
 
 bot.add_cog(Main(bot))
-bot.add_cog(Config(bot))
+bot.add_cog(Setup(bot))
 
 bot.run(os.getenv("TOKEN"))
