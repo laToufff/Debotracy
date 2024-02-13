@@ -1,13 +1,13 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, BigInteger, String, Boolean, ForeignKey
 from .base import Base
 
 
 class Guild(Base) :
     __tablename__ = 'guilds'
 
-    id = Column(Integer, primary_key=True, index=True)
-    votes_channel = Column(Integer)
-    vote_results_channel = Column(Integer)
+    id = Column(BigInteger, primary_key=True, index=True)
+    votes_channel = Column(BigInteger)
+    vote_results_channel = Column(BigInteger)
 
 class Vote(Base) :
     __tablename__ = 'votes'

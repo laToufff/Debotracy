@@ -1,5 +1,5 @@
 from .base import AsyncSessionLocal
-from .classes import Guild
+from .models import Guild
 
 
 async def set_guild(guild_id: int, vote_channel: int, vote_result_channel: int) -> None:

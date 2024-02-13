@@ -1,13 +1,29 @@
 version: '3'
 services:
-  discord-bot:
-    container_name: discord-bot
-    image: ghcr.io/latoufff/debotracy:main
+  debotracy:
+    container_name: debotracy
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: result/latest
+    # image: ghcr.io/latoufff/debotracy:main
     env_file:
       - .env
-    volumes:
-      - ./data:/app/data
     deploy:
       replicas: 1
       restart_policy:
         condition: on-failure
+  
+  debotracy-db:
+    container_name: ${DB_CONTAINER_NAME}
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+
+volumes:
+  db:
