@@ -19,7 +19,7 @@ db_url = URL.create(
 )
 engine = create_async_engine(db_url, echo=True)
 
-async_session: AsyncSession = async_sessionmaker(bind=engine, class_=AsyncSession)
+async_session: AsyncSession = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 async def create_all():
     async with engine.begin() as conn:
