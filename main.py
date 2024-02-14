@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from discord.ext import commands
 
 from src import database as db
-from src.cogs import Setup, Vote
+from src.cogs import Setup, Vote, Option
 from src.config import bot
 
 load_dotenv()
@@ -28,5 +28,6 @@ class Main (commands.Cog):
 bot.add_cog(Main(bot))
 bot.add_cog(Setup(bot))
 bot.add_cog(Vote(bot))
+bot.add_cog(Option(bot))
 
 bot.run(os.getenv("TOKEN"))

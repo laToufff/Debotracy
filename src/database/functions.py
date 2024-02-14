@@ -31,7 +31,8 @@ async def get_vote(vote_id: int) -> Vote:
     
 async def get_votes(guild_id: int, author_id: int = None) -> list[Vote]:
     async with async_session() as session:
-        votes = await session.execute(select(Vote).where(Vote.guild_id == guild_id).order_by(Vote.time_created.desc()))
+        stmt = select(Vote).where(Vote.guild_id == guild_id)
         if author_id:
-            return votes.filter(Vote.author_id == author_id).all().order_by(Vote.time_created.desc())
-        return votes.all()
+            stmt = stmt.where(Vote.author_id == author_id)
+        stmt = stmt.order_by(Vote.time_created.desc())
+        return (await session.execute(stmt)).scalars().all()
