@@ -24,14 +24,13 @@ class Vote(Base) :
     is_open = Column(Boolean)
 
     def __repr__(self) :
-        return f'<Vote id={self.id} guild_id={self.guild_id} author_id={self.author_id} name={self.name} description={self.description} multiple_choices={self.multiple_choices} time_created={self.time_created} time_closed={self.time_closed} time_edited={self.time_edited} is_open={self.is_open}>'
+        return f"<Vote id={self.id} guild_id={self.guild_id} author_id={self.author_id} name='{self.name}' description='{self.description}' multiple_choices={self.multiple_choices} time_created={self.time_created} time_closed={self.time_closed} time_edited={self.time_edited} is_open={self.is_open}>"
 
 class VoteMessage(Base) :
     __tablename__ = 'vote_messages'
 
-    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    vote_id = Column(Integer, ForeignKey('votes.id'))
-    msg_id = Column(BigInteger, index=True)
+    id = Column(BigInteger, primary_key=True, index=True)
+    vote_id = Column(Integer, ForeignKey('votes.id'), index=True)
 
 class VoteOption(Base) :
     __tablename__ = 'vote_options'

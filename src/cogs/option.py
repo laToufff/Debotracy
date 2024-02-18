@@ -2,7 +2,7 @@ import discord as dc
 from discord.ext import commands
 from discord.commands import SlashCommandGroup
 
-from ..database import get_votes
+from ..database import get_votes, get_vote, get_votes_channel, get_vote_message
 from ..utils import mention
 from ..config import Bot
 
@@ -45,9 +45,8 @@ class OptionCog (commands.Cog):
         if vote_id not in [vote.id for vote in votes]:
             await ctx.respond(f"You have not created a vote with the id {vote_id} on this server.", ephemeral=True)
             return
-        msg = self.bot.get_creation_msg(vote_id)
-        #chnl = await ctx.guild.fetch_channel(msg.channel.id)
-        #msg = await chnl.fetch_message(msg.id)
+        vote = await get_vote(vote_id)
+        msg = await get_vote_message(vote_id, ctx.guild)
         await msg.add_reaction(emoji)
         embed = msg.embeds[0]
         embed.add_field(name=emoji, value=desc, inline=True)

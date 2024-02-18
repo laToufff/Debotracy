@@ -4,7 +4,7 @@ import discord as dc
 from discord.ext import commands
 from discord.commands import SlashCommandGroup
 
-from ..database import get_guild, new_vote
+from ..database import get_guild, new_vote, get_votes_channel, get_vote_results_channel, add_vote_message
 from ..database.models import Vote
 
 from ..config import Bot
@@ -46,5 +46,8 @@ class VoteCog (commands.Cog):
         vote = await new_vote(vote)
         embed = Embed(title=vote.name, description=vote.description, color=0x00aaff)
         embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar)
-        response = await ctx.respond(f"Vote initialized with id {vote.id}.\nAdd options by running {mention.command('option add')}.", embed=embed)
-        self.bot.init_vote(vote.id, await response.original_message())
+        embed.set_footer(text="Vote id: "+str(vote.id))
+        channel = await get_votes_channel(ctx.guild)
+        msg = await channel.send(embed=embed)
+        await add_vote_message(vote.id, msg.id)
+        await ctx.respond(f"Vote created in channel {mention.channel(channel)}.\nAdd options by running {mention.command('option add')}.", embed=embed, ephemeral=True)

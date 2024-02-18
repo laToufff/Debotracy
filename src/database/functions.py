@@ -1,5 +1,7 @@
+import discord as dc
+
 from .base import async_session
-from .models import Guild, Vote
+from .models import Guild, Vote, VoteMessage
 
 from sqlalchemy.future import select
 
@@ -36,3 +38,23 @@ async def get_votes(guild_id: int, author_id: int = None) -> list[Vote]:
             stmt = stmt.where(Vote.author_id == author_id)
         stmt = stmt.order_by(Vote.time_created.desc())
         return (await session.execute(stmt)).scalars().all()
+    
+async def get_votes_channel(guild: dc.Guild) -> dc.TextChannel:
+    g: Guild = await get_guild(guild.id)
+    chnl_id: int = g.votes_channel
+    return await guild.fetch_channel(chnl_id)
+    
+async def get_vote_results_channel(guild: dc.Guild) -> dc.TextChannel:
+    g: Guild = await get_guild(guild.id)
+    chnl_id: int = g.vote_results_channel
+    return await guild.fetch_channel(chnl_id)
+
+async def get_vote_message(vote_id: int, guild: dc.Guild) -> dc.Message:
+    async with async_session() as session:
+        msg_id = (await session.execute(select(VoteMessage).where(VoteMessage.vote_id == vote_id))).scalars().first().id
+        return await (await get_votes_channel(guild)).fetch_message(msg_id)
+    
+async def add_vote_message(vote_id: int, message_id: int) -> None:
+    async with async_session() as session:
+        session.add(VoteMessage(id=message_id, vote_id=vote_id))
+        await session.commit()
