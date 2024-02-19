@@ -5,7 +5,7 @@ from .base import Base
 class Guild(Base) :
     __tablename__ = 'guilds'
 
-    id = Column(BigInteger, primary_key=True, index=True)
+    id = Column(BigInteger, primary_key=True, index=True) # Guild ID
     votes_channel = Column(BigInteger)
     vote_results_channel = Column(BigInteger)
 
@@ -29,23 +29,23 @@ class Vote(Base) :
 class VoteMessage(Base) :
     __tablename__ = 'vote_messages'
 
-    id = Column(BigInteger, primary_key=True, index=True)
+    id = Column(BigInteger, primary_key=True, index=True) # Message ID
     vote_id = Column(Integer, ForeignKey('votes.id'), index=True)
 
 class VoteOption(Base) :
     __tablename__ = 'vote_options'
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    vote_id = Column(Integer, ForeignKey('votes.id'))
-    emoji = Column(String)
+    emoji = Column(String, index=True)
     description = Column(String)
 
 class VoteChoice(Base) :
     __tablename__ = 'vote_choices'
 
-    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    vote_id = Column(Integer, ForeignKey('votes.id'))
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    vote_id = Column(Integer, ForeignKey('votes.id'), index=True)
     option_id = Column(Integer, ForeignKey('vote_options.id'))
+    index = Column(Integer, index=True)
 
 class VoteUser(Base) :
     __tablename__ = 'vote_users'

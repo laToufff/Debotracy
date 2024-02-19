@@ -1,60 +1,83 @@
 import discord as dc
 
 from .base import async_session
-from .models import Guild, Vote, VoteMessage
+from .models import Guild, VoteMessage
 
 from sqlalchemy.future import select
 
 
-async def set_guild(guild_id: int, vote_channel: int, vote_result_channel: int) -> None:
-    async with async_session() as session:
-        guild = await session.get(Guild, guild_id)
-        if guild:
-            guild.votes_channel = vote_channel
-            guild.vote_results_channel = vote_result_channel
-        else:
-            guild = Guild(id=guild_id, votes_channel=vote_channel, vote_results_channel=vote_result_channel)
-            session.add(guild)
-        await session.commit()
+async def get(cls: type, id: int = None, **kwargs):
+    """Get an object of type `cls` from the database by its id if provided, or otherwise by its attributes.
+    >>> guild: Guild = await get(Guild, ctx.guild.id)"""
 
-async def get_guild(guild_id: int) -> Guild:
     async with async_session() as session:
-        return await session.get(Guild, guild_id)
+        if id:
+            return await session.get(cls, id)
+        return (await session.execute(select(cls).filter_by(**kwargs))).scalars().first()
     
-async def new_vote(vote: Vote) -> Vote:
+async def get_all(cls: type, order_by = None, **kwargs) -> list:
+    """Get all objects of type `cls` from the database that match the provided attributes. If `order_by` is provided, the results will be sorted accordingly.
+    >>> votes: list[Vote] = await get_all(Vote, guild_id=ctx.guild.id, is_open=True, ...)"""
+
     async with async_session() as session:
-        session.add(vote)
-        await session.commit()
-        return vote
-    
-async def get_vote(vote_id: int) -> Vote:
-    async with async_session() as session:
-        return await session.get(Vote, vote_id)
-    
-async def get_votes(guild_id: int, author_id: int = None) -> list[Vote]:
-    async with async_session() as session:
-        stmt = select(Vote).where(Vote.guild_id == guild_id)
-        if author_id:
-            stmt = stmt.where(Vote.author_id == author_id)
-        stmt = stmt.order_by(Vote.time_created.desc())
+        stmt = select(cls).filter_by(**kwargs)
+        stmt = stmt.order_by(order_by)
         return (await session.execute(stmt)).scalars().all()
     
-async def get_votes_channel(guild: dc.Guild) -> dc.TextChannel:
-    g: Guild = await get_guild(guild.id)
-    chnl_id: int = g.votes_channel
-    return await guild.fetch_channel(chnl_id)
+async def edit(cls: type, id: int, **kwargs):
+    """Edit the object of type `cls` with the provided `id`, changing the attributes to the provided values.
+    >>> await edit(Guild, ctx.guild.id, votes_channel=...)"""
+
+    async with async_session() as session:
+        obj = await session.get(cls, id)
+        for k, v in kwargs.items():
+            setattr(obj, k, v)
+        await session.commit()
+        return obj
     
+async def new(cls: type, **kwargs):
+    """Create a new object of type `cls` with the provided attributes.
+    >>> vote: Vote = await new(Vote, guild_id=ctx.guild.id, ...)"""
+
+    async with async_session() as session:
+        obj = cls(**kwargs)
+        session.add(obj)
+        await session.commit()
+        return obj
+    
+async def add(obj: object):
+    """Add the provided object to the database.
+    >>> await add(vote)"""
+
+    async with async_session() as session:
+        session.add(obj)
+        await session.commit()
+        return obj
+    
+async def set(cls: type, id: int, **kwargs):
+    """Set the object of type `cls` with the provided `id`, changing the attributes to the provided values if it exists, or creating a new object with the provided attributes if it doesn't.
+    >>> await set(Guild, ctx.guild.id, votes_channel=...)"""
+
+    async with async_session() as session:
+        if obj := await session.get(cls, id):
+            for k, v in kwargs.items():
+                setattr(obj, k, v)
+        else:
+            obj = cls(id=id, **kwargs)
+            session.add(obj)
+        await session.commit()
+        return obj
+    
+async def get_channel(guild: dc.Guild, name: str) -> dc.TextChannel:
+    id: int = getattr(await get(Guild, guild.id), name, None)
+    return await guild.fetch_channel(id)
+    
+async def get_votes_channel(guild: dc.Guild) -> dc.TextChannel:
+    return await get_channel(guild, 'votes_channel')
+
 async def get_vote_results_channel(guild: dc.Guild) -> dc.TextChannel:
-    g: Guild = await get_guild(guild.id)
-    chnl_id: int = g.vote_results_channel
-    return await guild.fetch_channel(chnl_id)
+    return await get_channel(guild, 'vote_results_channel')
 
 async def get_vote_message(vote_id: int, guild: dc.Guild) -> dc.Message:
-    async with async_session() as session:
-        msg_id = (await session.execute(select(VoteMessage).where(VoteMessage.vote_id == vote_id))).scalars().first().id
-        return await (await get_votes_channel(guild)).fetch_message(msg_id)
-    
-async def add_vote_message(vote_id: int, message_id: int) -> None:
-    async with async_session() as session:
-        session.add(VoteMessage(id=message_id, vote_id=vote_id))
-        await session.commit()
+    id: int = (await get(VoteMessage, vote_id=vote_id)).id
+    return await (await get_votes_channel(guild)).fetch_message(id)

@@ -1,7 +1,8 @@
 import discord as dc
 from discord.ext import commands
 
-from ..database import set_guild, get_guild
+from ..database.functions import set, get
+from ..database.models import Guild
 from ..utils import mention, Embed
 
 class Setup (commands.Cog):
@@ -17,15 +18,15 @@ class Setup (commands.Cog):
                      type=dc.TextChannel,
                      required=True)
     @commands.slash_command()
-    async def setup(self, ctx: dc.ApplicationContext, vote_channel: dc.TextChannel, vote_result_channel: dc.TextChannel):
+    async def setup(self, ctx: dc.ApplicationContext, votes_channel: dc.TextChannel, vote_result_channel: dc.TextChannel):
         """Setup the channels needed for the bot to work."""
-        await set_guild(ctx.guild.id, vote_channel.id, vote_result_channel.id)
+        await set(Guild, ctx.guild.id, votes_channel=votes_channel.id, vote_results_channel=vote_result_channel.id)
         await ctx.respond('Guild setup successfully!', ephemeral=True)
 
     @commands.slash_command()
     async def info(self, ctx: dc.ApplicationContext):
         """Get the current setup of the guild."""
-        guild = await get_guild(ctx.guild.id)
+        guild: Guild = await get(Guild, ctx.guild.id)
         embed = Embed(title=f'Current setup for {ctx.guild.name} :', color=0x0000ff)
         if guild:
             embed.description = f"These values can be changed at any time using the {mention.command('setup')} command"
